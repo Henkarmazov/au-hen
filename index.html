@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PhotoTok</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* =========================
+           POST
+        ========================= */
+
+        .post {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* =========================
+           FOTO CAROUSEL
+        ========================= */
+
+        .carousel {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            scroll-snap-type: x mandatory;
+
+            scrollbar-width: none;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .photo {
+            min-width: 100%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            scroll-snap-align: center;
+
+            background: #000;
+        }
+
+        .photo img {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
+        /* =========================
+           GRADIENT
+        ========================= */
+
+        .gradient {
+            position: absolute;
+
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            height: 260px;
+
+            background: linear-gradient(
+                transparent,
+                rgba(0,0,0,.85)
+            );
+
+            pointer-events: none;
+        }
+
+        /* =========================
+           PROFILE
+        ========================= */
+
+        .profile {
+            position: absolute;
+
+            left: 16px;
+            bottom: 120px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            z-index: 5;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border: 2px solid white;
+        }
+
+        .username {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .follow {
+            margin-left: 5px;
+
+            padding: 4px 9px;
+
+            border: 1px solid white;
+            border-radius: 4px;
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           CAPTION
+        ========================= */
+
+        .caption {
+            position: absolute;
+
+            left: 16px;
+            right: 80px;
+            bottom: 65px;
+
+            z-index: 5;
+        }
+
+        .caption p {
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        /* =========================
+           ACTION BUTTON
+        ========================= */
+
+        .actions {
+            position: absolute;
+
+            right: 14px;
+            bottom: 80px;
+
+            z-index: 10;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .action {
+            border: none;
+
+            background: transparent;
+
+            color: white;
+
+            cursor: pointer;
+
+            text-align: center;
+
+            font-size: 12px;
+        }
+
+        .icon {
+            width: 45px;
+            height: 45px;
+
+            border-radius: 50%;
+
+            background: rgba(0,0,0,.35);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 25px;
+
+            margin-bottom: 4px;
+        }
+
+        .action.liked .icon {
+            color: #ff3158;
+        }
+
+        /* =========================
+           MUSIC
+        ========================= */
+
+        .music {
+            position: absolute;
+
+            left: 16px;
+            bottom: 20px;
+
+            z-index: 10;
+
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 13px;
+        }
+
+        .music-icon {
+            width: 22px;
+            height: 22px;
+
+            border-radius: 50%;
+
+            border: 2px solid white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 10px;
+        }
+
+        /* =========================
+           FOTO COUNTER
+        ========================= */
+
+        .counter {
+            position: absolute;
+
+            top: 25px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            z-index: 10;
+
+            padding: 6px 12px;
+
+            background: rgba(0,0,0,.45);
+
+            border-radius: 20px;
+
+            font-size: 12px;
+        }
+
+        /* =========================
+           COMMENT MODAL
+        ========================= */
+
+        .comments {
+            position: absolute;
+
+            left: 0;
+            right: 0;
+            bottom: -100%;
+
+            height: 55vh;
+
+            background: #fff;
+            color: #111;
+
+            border-radius: 18px 18px 0 0;
+
+            z-index: 50;
+
+            padding: 20px;
+
+            transition: .3s;
+        }
+
+        .comments.active {
+            bottom: 0;
+        }
+
+        .comments h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .comment {
+            display: flex;
+            gap: 10px;
+
+            margin-bottom: 15px;
+        }
+
+        .comment img {
+            width: 34px;
+            height: 34px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+        }
+
+        .comment b {
+            font-size: 13px;
+        }
+
+        .comment p {
+            font-size: 13px;
+            color: #555;
+            margin-top: 3px;
+        }
+
+        .close {
+            position: absolute;
+
+            right: 20px;
+            top: 15px;
+
+            border: none;
+            background: none;
+
+            font-size: 22px;
+
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="post">
+
+        <!-- =========================
+             FOTO
+        ========================= -->
+
+        <div class="carousel" id="carousel">
+
+            <div class="photo">
+                <img src="foto1.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto2.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto3.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto4.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto5.jpg">
+            </div>
+          <div class="photo">
+                <img src="foto6.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto7.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto8.jpg">
+            </div>
+
+            <div class="photo">
+                <img src="foto9.jpg">
+            </div>
+          <div class="photo">
+                <img src="foto10.jpg">
+          </div>
+
+        </div>
+
+
+        <div class="gradient"></div>
+
+
+        <!-- =========================
+             COUNTER
+        ========================= -->
+
+        <div class="counter" id="counter">
+            1 / 10
+        </div>
+
+
+        <!-- =========================
+             PROFILE
+        ========================= -->
+
+        <div class="profile">
+
+            <img
+                class="avatar"
+                src="ava.jpg"
+            >
+
+            <span class="username">
+                @butterfly
+            </span>
+
+            <span class="follow">
+                Follow
+            </span>
+
+        </div>
+
+
+        <!-- =========================
+             CAPTION
+        ========================= -->
+
+        <div class="caption">
+
+            <p>
+                @butterfly · #oneshoot
+            </p>
+
+        </div>
+
+
+        <!-- =========================
+             ACTIONS
+        ========================= -->
+
+        <div class="actions">
+
+            <button
+                class="action"
+                id="likeBtn"
+                onclick="likePost()"
+            >
+                <div class="icon">
+                    ♡
+                </div>
+
+                <span id="likeCount">
+                    128
+                </span>
+            </button>
+
+
+            <button
+                class="action"
+                onclick="openComments()"
+            >
+                <div class="icon">
+                    💬
+                </div>
+
+                <span>
+                    24
+                </span>
+            </button>
+
+
+            <button
+                class="action"
+                onclick="sharePost()"
+            >
+                <div class="icon">
+                    ↗
+                </div>
+
+                <span>
+                    Share
+                </span>
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             MUSIC
+        ========================= -->
+
+        <div class="music">
+
+            <div class="music-icon">
+                ♪
+            </div>
+
+            <span>
+                Pencet Ini
+            </span>
+
+        </div>
+
+
+        <!-- =========================
+             COMMENTS
+        ========================= -->
+
+        <div
+            class="comments"
+            id="comments"
+        >
+
+            <button
+                class="close"
+                onclick="closeComments()"
+            >
+                ×
+            </button>
+
+            <h3>
+                Komentar
+            </h3>
+
+
+            <div class="comment">
+
+                <img src="ava1.jpg">
+
+                <div>
+                    <b>@iyaa</b>
+
+                    <p>
+                       sialan
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="comment">
+
+                <img src="ava2.jpg">
+
+                <div>
+                    <b>@zee?</b>
+
+                    <p>
+                        author anj
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         AUDIO
+    ========================= -->
+
+    <audio
+        id="music"
+        src="musik.mp3"
+        loop
+    ></audio>
+
+
+    <script>
+
+        const carousel =
+            document.getElementById("carousel");
+
+        const counter =
+            document.getElementById("counter");
+
+        const music =
+            document.getElementById("music");
+
+
+        /* =========================
+           FOTO COUNTER
+        ========================= */
+
+        carousel.addEventListener(
+            "scroll",
+            () => {
+
+                const index =
+                    Math.round(
+                        carousel.scrollLeft /
+                        carousel.clientWidth
+                    );
+
+                counter.textContent =
+                    `${index + 1} / 10`;
+
+            }
+        );
+
+
+        /* =========================
+           LIKE
+        ========================= */
+
+        let liked = false;
+
+        let likes = 128;
+
+        function likePost() {
+
+            const button =
+                document.getElementById("likeBtn");
+
+            const count =
+                document.getElementById("likeCount");
+
+            liked = !liked;
+
+            if (liked) {
+
+                likes++;
+
+                button.classList.add("liked");
+
+                button.querySelector(".icon")
+                    .textContent = "♥";
+
+            } else {
+
+                likes--;
+
+                button.classList.remove("liked");
+
+                button.querySelector(".icon")
+                    .textContent = "♡";
+
+            }
+
+            count.textContent = likes;
+
+        }
+
+
+        /* =========================
+           COMMENTS
+        ========================= */
+
+        function openComments() {
+
+            document
+                .getElementById("comments")
+                .classList.add("active");
+
+        }
+
+
+        function closeComments() {
+
+            document
+                .getElementById("comments")
+                .classList.remove("active");
+
+        }
+
+
+        /* =========================
+           SHARE
+        ========================= */
+
+        function sharePost() {
+
+            if (
+                navigator.share
+            ) {
+
+                navigator.share({
+
+                    title: "Sebuah cerita",
+
+                    text:
+                        "Lihat foto ini.",
+
+                    url:
+                        window.location.href
+
+                });
+
+            } else {
+
+                navigator.clipboard.writeText(
+                    window.location.href
+                );
+
+                alert(
+                    "Link berhasil disalin."
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           AUTOPLAY MUSIC
+        ========================= */
+
+        function startMusic() {
+
+            music
+                .play()
+                .catch(() => {
+
+                    /*
+                     Browser biasanya
+                     memblokir autoplay.
+
+                     Musik akan mulai setelah
+                     user menyentuh halaman.
+                    */
+
+                });
+
+        }
+
+
+        document.addEventListener(
+            "click",
+            () => {
+
+                startMusic();
+
+            },
+            { once: true }
+        );
+
+
+        document.addEventListener(
+            "touchstart",
+            () => {
+
+                startMusic();
+
+            },
+            { once: true }
+        );
+
+    </script>
+
+</body>
+</html>
